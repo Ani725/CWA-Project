@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
-import ProductsPage from './pages/ProductsPage';
+import ProductsPages from './pages/ProductsPages'; // <-- FIX: Changed to ProductsPages
 import ShoppingCartPanel from './components/ShoppingCartPanel';
 import ProductDetail from './components/ProductDetail';
 import cartUtils from './services/cartUtils';
@@ -22,22 +22,22 @@ function App() {
     const loadCategories = async () => {
       try {
         const cats = await productService.getCategories();
-        
-        // Log the categories for debugging purposes
+
+        // Log the API response to inspect its structure
         console.log('Categories API response:', cats);
 
         // Ensure 'cats' is an array before setting state
         const categoriesArray = Array.isArray(cats) ? cats : [];
-        
-        // If categories are objects, extract the category name or slug
+
+        // If categories are objects, extract the category name or slug (e.g., in case the API format changes)
         if (categoriesArray.length > 0 && typeof categoriesArray[0] === 'object') {
           // Extract category name or slug from the object
           const formattedCategories = categoriesArray.map(cat => cat.name || cat.slug || '');
-          setCategories(['all', ...formattedCategories]);  // Prepend "all"
+          setCategories(['all', ...formattedCategories]); // Prepend "all"
         } else {
-          setCategories(['all', ...categoriesArray]);  // Prepend "all"
+          setCategories(['all', ...categoriesArray]); // Prepend "all"
         }
-        
+
         setAppError(null);
       } catch (error) {
         console.error("Failed to load categories:", error);
@@ -90,9 +90,9 @@ function App() {
 
       <main className="main-content">
         <div className="filters-section">
-          <select 
-            className="filter-select" 
-            value={selectedCategory} 
+          <select
+            className="filter-select"
+            value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
           >
             {/* Logic to safely render category strings */}
@@ -111,9 +111,9 @@ function App() {
             })}
           </select>
 
-          <select 
-            className="filter-select" 
-            value={sortBy} 
+          <select
+            className="filter-select"
+            value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
           >
             <option value="none">Sort By</option>
@@ -122,7 +122,7 @@ function App() {
           </select>
         </div>
 
-        <ProductsPage
+        <ProductsPages // <-- FIX: Component name changed to ProductsPages
           searchTerm={searchTerm}
           selectedCategory={selectedCategory}
           priceRange={priceRange}

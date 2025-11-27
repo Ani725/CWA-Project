@@ -1,11 +1,21 @@
 const cartUtils = {
   getCart: () => {
     try {
-      const cart = localStorage.getItem('cart');
-      // FIX: Add try...catch block to safely parse corrupted localStorage data
-      return cart ? JSON.parse(cart) : [];
+      // 1. Get the raw string from localStorage
+      const cartString = localStorage.getItem('cart');
+
+      // 2. Safely parse it. If null, empty, or fails parsing, return an empty array.
+      // If cartString is null or undefined, JSON.parse(null) is null. 
+      // The coalesce operator (??) ensures we default to an empty array.
+      const cartData = cartString ? JSON.parse(cartString) : null;
+      
+      // Ensure the result is an array before returning it
+      return Array.isArray(cartData) ? cartData : [];
+
     } catch (e) {
+      // If parsing fails (e.g., corrupted storage), log the error and return an empty array.
       console.error("Could not parse cart data from localStorage, resetting cart:", e);
+      // This ensures the value of 'cart' is ALWAYS an array, preventing the .reduce() error.
       return []; 
     }
   },
@@ -21,12 +31,13 @@ const cartUtils = {
     if (existingItem) {
       existingItem.quantity += 1;
     } else {
-      cart.push({ 
-          id: product.id, 
-          title: product.title, 
-          price: product.price, 
+      // FIX: Only push essential properties for the cart item
+      cart.push({
+          id: product.id,
+          title: product.title,
+          price: product.price,
           thumbnail: product.thumbnail,
-          quantity: 1 
+          quantity: 1
       });
     }
 
