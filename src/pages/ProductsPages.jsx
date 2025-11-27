@@ -2,9 +2,7 @@ import React, { useEffect, useState } from 'react';
 import ProductCard from '../components/ProductCard';
 import productService from '../services/productService';
 
-// NOTE: The manual categoryMap has been removed. 
-// The filtering logic below is now robust and does not require it.
-
+// The filtering logic below is robust
 function ProductsPage({
   searchTerm,
   selectedCategory,
@@ -39,7 +37,7 @@ function ProductsPage({
   }, [products, searchTerm, selectedCategory, priceRange, sortBy]);
 
 
-  // 🧠 MAIN FILTERING LOGIC
+  // MAIN FILTERING LOGIC
   const applyFilters = () => {
     let filtered = [...products];
 

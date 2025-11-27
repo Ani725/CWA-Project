@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
-import ProductsPages from './pages/ProductsPages'; // <-- FIX: Changed to ProductsPages
+import ProductsPages from './pages/ProductsPages'; 
 import ShoppingCartPanel from './components/ShoppingCartPanel';
 import ProductDetail from './components/ProductDetail';
 import cartUtils from './services/cartUtils';
@@ -122,7 +122,7 @@ function App() {
           </select>
         </div>
 
-        <ProductsPages // <-- FIX: Component name changed to ProductsPages
+        <ProductsPages 
           searchTerm={searchTerm}
           selectedCategory={selectedCategory}
           priceRange={priceRange}

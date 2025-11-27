@@ -1,10 +1,10 @@
 const cartUtils = {
   getCart: () => {
     try {
-      // 1. Get the raw string from localStorage
+      // Get the raw string from localStorage
       const cartString = localStorage.getItem('cart');
 
-      // 2. Safely parse it. If null, empty, or fails parsing, return an empty array.
+      // Safely parse string. If null, empty, or fails parsing, return an empty array.
       // If cartString is null or undefined, JSON.parse(null) is null. 
       // The coalesce operator (??) ensures we default to an empty array.
       const cartData = cartString ? JSON.parse(cartString) : null;
@@ -31,7 +31,7 @@ const cartUtils = {
     if (existingItem) {
       existingItem.quantity += 1;
     } else {
-      // FIX: Only push essential properties for the cart item
+      // Only push essential properties for the cart item
       cart.push({
           id: product.id,
           title: product.title,

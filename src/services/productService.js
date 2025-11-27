@@ -1,6 +1,6 @@
 const productService = {
   getAllProducts: async () => {
-    // Fetch ALL products (190+), including beauty, kitchen, mobile, etc.
+    // Fetch products from a dummy API
     const response = await fetch('https://dummyjson.com/products?limit=100');
     const data = await response.json();
     return data.products;
