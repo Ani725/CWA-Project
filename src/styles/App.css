@@ -1011,4 +1011,11 @@ body {
   .cart-panel.open {
     right: 0;
   }
+  .review-form .star-rating-input .star-input {
+    cursor: pointer;
+    transition: color 0.1s;
+  }
+  .review-form .star-rating-input .star-input:hover {
+    color: #fcd34d;
+  }
 }

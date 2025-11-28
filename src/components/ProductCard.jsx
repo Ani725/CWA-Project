@@ -1,23 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { Star, ShoppingCart } from 'lucide-react';
-import reviewUtils from '../services/reviewUtils'; // Import review utility
+import reviewUtils from '../services/reviewUtils'; 
 
 function ProductCard({ product, onViewDetails, onAddToCart }) {
   if (!product) return null;
 
-  // New state to hold the calculated average rating
   const [displayRating, setDisplayRating] = useState(product.rating || 0);
   const [reviewCount, setReviewCount] = useState(product.reviews?.length || 0);
 
-  // Hook to calculate the dynamic rating on load
   useEffect(() => {
-    // Get the dynamically calculated average rating from all sources
-    const newAvg = reviewUtils.getAverageRating(product.id, product.rating);
-    setDisplayRating(newAvg);
+    const userReviews = reviewUtils.getReviews(product.id);
+    const apiReviews = product.reviews || [];
+    const combinedReviews = [...apiReviews, ...userReviews];
     
-    const allReviews = reviewUtils.getReviews(product.id);
-    setReviewCount(allReviews.length);
-  }, [product.id, product.rating]);
+    const newAvg = reviewUtils.getAverageRating(combinedReviews, product.rating);
+    
+    setDisplayRating(newAvg);
+    setReviewCount(combinedReviews.length);
+    
+  }, [product.id, product.rating, product.reviews]);
 
 
   const discountedPrice = product.discountPercentage 
@@ -44,12 +45,10 @@ function ProductCard({ product, onViewDetails, onAddToCart }) {
             <Star
               key={i}
               size={16}
-              // Use the calculated displayRating
               fill={i < Math.floor(displayRating) ? '#fbbf24' : 'none'}
               stroke={i < Math.floor(displayRating) ? '#fbbf24' : '#d1d5db'}
             />
           ))}
-          {/* Display the calculated average and count */}
           <span className="rating-text">({displayRating.toFixed(1)}) / {reviewCount}</span>
         </div>
         
