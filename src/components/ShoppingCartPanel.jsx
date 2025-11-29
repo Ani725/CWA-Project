@@ -1,5 +1,6 @@
 import React from 'react';
 import { X, ShoppingCart, Minus, Plus, Trash } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 function ShoppingCartPanel({ isOpen, onClose, cart, onUpdateQuantity, onRemove }) {
   const subtotal = cart.reduce(
@@ -11,6 +12,13 @@ function ShoppingCartPanel({ isOpen, onClose, cart, onUpdateQuantity, onRemove }
 
   const shipping = totalItems > 0 ? 5.00 : 0.00; 
   const total = (parseFloat(subtotal) + shipping).toFixed(2);
+
+  const navigate = useNavigate();
+
+  const handleProceed = () => {
+    onClose();
+    navigate('/checkout');
+  };
 
   return (
     <>
@@ -81,7 +89,7 @@ function ShoppingCartPanel({ isOpen, onClose, cart, onUpdateQuantity, onRemove }
               <span>${total}</span>
             </div>
           </div>
-          <button className="btn-checkout" disabled={cart.length === 0}>
+          <button className="btn-checkout" disabled={cart.length === 0} onClick={handleProceed}>
             Proceed to Checkout
           </button>
         </div>

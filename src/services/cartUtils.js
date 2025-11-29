@@ -21,7 +21,21 @@ const cartUtils = {
   },
 
   saveCart: (cart) => {
-    localStorage.setItem('cart', JSON.stringify(cart));
+    try {
+      localStorage.setItem('cart', JSON.stringify(cart));
+      // Emit an event so other parts of the app can react to cart changes
+      try {
+        const ev = new CustomEvent('cartUpdated', { detail: cart });
+        window.dispatchEvent(ev);
+      } catch (e) {
+        // Fallback for older browsers
+        const evt = document.createEvent('CustomEvent');
+        evt.initCustomEvent('cartUpdated', false, false, cart);
+        window.dispatchEvent(evt);
+      }
+    } catch (e) {
+      console.error('Failed to save cart to localStorage:', e);
+    }
   },
 
   addToCart: (product) => {

@@ -1,8 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import ProductsPages from './pages/ProductsPages'; 
 import ShoppingCartPanel from './components/ShoppingCartPanel';
 import ProductDetail from './components/ProductDetail';
+import { Routes, Route } from 'react-router-dom';
+import CartPage from './pages/CartPage';
+import Checkout from './pages/Checkout';
+import OrderConfirmation from './pages/OrderConfirmation';
+import ProductDetailPage from './pages/ProductDetailPage';
+import Footer from './components/Footer';
 import cartUtils from './services/cartUtils';
 import productService from './services/productService';
 
@@ -47,6 +54,33 @@ function App() {
     loadCategories();
   }, []);
 
+  // Listen for cart updates from cartUtils.saveCart or other components
+  useEffect(() => {
+    const handleCartUpdate = (e) => {
+      try {
+        const updated = (e && e.detail) ? e.detail : cartUtils.getCart();
+        setCart(Array.isArray(updated) ? updated : cartUtils.getCart());
+      } catch (err) {
+        setCart(cartUtils.getCart());
+      }
+    };
+
+    window.addEventListener('cartUpdated', handleCartUpdate);
+    
+    // Also listen for storage events from other tabs
+    const handleStorageUpdate = (ev) => {
+      if (ev.key === 'cart') {
+        setCart(cartUtils.getCart());
+      }
+    };
+    window.addEventListener('storage', handleStorageUpdate);
+
+    return () => {
+      window.removeEventListener('cartUpdated', handleCartUpdate);
+      window.removeEventListener('storage', handleStorageUpdate);
+    };
+  }, []);
+
   const updateCart = (newCart) => {
     cartUtils.saveCart(newCart);
     setCart(newCart);
@@ -68,6 +102,7 @@ function App() {
   };
 
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const location = useLocation();
 
   if (appError) {
     return (
@@ -89,48 +124,61 @@ function App() {
       />
 
       <main className="main-content">
-        <div className="filters-section">
-          <select
-            className="filter-select"
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-          >
-            {/* Logic to safely render category strings */}
-            {categories.map((cat, index) => {
-              if (typeof cat !== 'string' || cat.length === 0) {
-                return null;
-              }
+        {location.pathname === '/' && (
+          <div className="filters-section">
+            <select
+              className="filter-select"
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+            >
+              {/* Logic to safely render category strings */}
+              {categories.map((cat, index) => {
+                if (typeof cat !== 'string' || cat.length === 0) {
+                  return null;
+                }
 
-              const displayLabel = cat.charAt(0).toUpperCase() + cat.slice(1).replace('-', ' ');
+                const displayLabel = cat.charAt(0).toUpperCase() + cat.slice(1).replace('-', ' ');
 
-              return (
-                <option key={index} value={cat}>
-                  {displayLabel}
-                </option>
-              );
-            })}
-          </select>
+                return (
+                  <option key={index} value={cat}>
+                    {displayLabel}
+                  </option>
+                );
+              })}
+            </select>
 
-          <select
-            className="filter-select"
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-          >
-            <option value="none">Sort By</option>
-            <option value="price-low">Price: Low to High</option>
-            <option value="price-high">Price: High to Low</option>
-          </select>
-        </div>
+            <select
+              className="filter-select"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+            >
+              <option value="none">Sort By</option>
+              <option value="price-low">Price: Low to High</option>
+              <option value="price-high">Price: High to Low</option>
+            </select>
+          </div>
+        )}
 
-        <ProductsPages 
-          searchTerm={searchTerm}
-          selectedCategory={selectedCategory}
-          priceRange={priceRange}
-          sortBy={sortBy}
-          onAddToCart={handleAddToCart}
-          onViewDetails={setSelectedProduct}
-        />
+        <Routes>
+          <Route path="/" element={
+            <ProductsPages
+              searchTerm={searchTerm}
+              selectedCategory={selectedCategory}
+              priceRange={priceRange}
+              sortBy={sortBy}
+              onAddToCart={handleAddToCart}
+              onViewDetails={setSelectedProduct}
+            />
+          } />
+
+          <Route path="/product/:id" element={<ProductDetailPage onAddToCart={handleAddToCart} />} />
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/confirmation" element={<OrderConfirmation />} />
+        </Routes>
       </main>
+
+      <Footer />
 
       {selectedProduct && (
         <ProductDetail

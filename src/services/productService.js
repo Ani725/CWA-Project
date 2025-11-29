@@ -13,3 +13,15 @@ const productService = {
 };
 
 export default productService;
+
+// Add helper to fetch a single product by id
+productService.getProductById = async (id) => {
+  try {
+    const res = await fetch(`https://dummyjson.com/products/${id}`);
+    const data = await res.json();
+    return data;
+  } catch (e) {
+    console.error('Failed to fetch product by id', e);
+    throw e;
+  }
+};
