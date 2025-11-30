@@ -124,7 +124,9 @@ Deployment (Vercel)
 3. Use the default Vite settings; build command `npm run build` and output directory `dist`.
 
 Team
-- Add your team members here.
+- Shanley Aninzo
+- Rohina Sultani
 
-License
-- Add license or project notes here.
+Link to Vercel Deployment
+https://cwa-project.vercel.app/ 
+
