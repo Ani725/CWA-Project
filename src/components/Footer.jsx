@@ -1,15 +1,25 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Facebook, Twitter, Instagram, Github } from 'lucide-react';
 
 function Footer() {
   const year = new Date().getFullYear();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const goHome = (e) => {
     e.preventDefault();
-    navigate('/');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Dispatch a headerLogoClick event so Checkout can intercept navigation
+    try {
+      const ev = new CustomEvent('headerLogoClick', { detail: { navigateTo: '/' } });
+      window.dispatchEvent(ev);
+    } catch (err) {}
+
+    // Only navigate immediately if not on checkout; Checkout will handle navigation after confirmation
+    if (location.pathname !== '/checkout') {
+      navigate('/');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   const scrollTop = (e) => {

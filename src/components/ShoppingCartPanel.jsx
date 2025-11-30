@@ -16,6 +16,10 @@ function ShoppingCartPanel({ isOpen, onClose, cart, onUpdateQuantity, onRemove }
   const navigate = useNavigate();
 
   const handleProceed = () => {
+    try {
+      const ev = new CustomEvent('clearSearch');
+      window.dispatchEvent(ev);
+    } catch (err) {}
     onClose();
     navigate('/checkout');
   };

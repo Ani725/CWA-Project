@@ -5,7 +5,6 @@ import ProductsPages from './pages/ProductsPages';
 import ShoppingCartPanel from './components/ShoppingCartPanel';
 import ProductDetail from './components/ProductDetail';
 import { Routes, Route } from 'react-router-dom';
-import CartPage from './pages/CartPage';
 import Checkout from './pages/Checkout';
 import OrderConfirmation from './pages/OrderConfirmation';
 import ProductDetailPage from './pages/ProductDetailPage';
@@ -81,6 +80,23 @@ function App() {
     };
   }, []);
 
+  // Listen for a request to clear the global search term
+  useEffect(() => {
+    const handleClearSearch = () => setSearchTerm('');
+    window.addEventListener('clearSearch', handleClearSearch);
+    return () => window.removeEventListener('clearSearch', handleClearSearch);
+  }, []);
+
+  // Listen for a request to apply a search term globally (e.g., from Checkout)
+  useEffect(() => {
+    const handleApplySearch = (e) => {
+      const t = e && e.detail ? String(e.detail) : '';
+      setSearchTerm(t);
+    };
+    window.addEventListener('applySearch', handleApplySearch);
+    return () => window.removeEventListener('applySearch', handleApplySearch);
+  }, []);
+
   const updateCart = (newCart) => {
     cartUtils.saveCart(newCart);
     setCart(newCart);
@@ -99,6 +115,13 @@ function App() {
   const handleUpdateQuantity = (productId, change) => {
     const updatedCart = cartUtils.updateQuantity(productId, change);
     updateCart(updatedCart);
+  };
+
+  const handleSearchOnCheckout = (term) => {
+    if (location.pathname === '/checkout' && term) {
+      setSearchTerm(term);
+      // Dialog will be shown in Checkout component when search changes
+    }
   };
 
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -121,6 +144,8 @@ function App() {
         setSearchTerm={setSearchTerm}
         totalItems={totalItems}
         openCart={() => setIsCartOpen(true)}
+        currentPath={location.pathname}
+        onCheckoutSearchEnter={handleSearchOnCheckout}
       />
 
       <main className="main-content">
@@ -172,8 +197,7 @@ function App() {
           } />
 
           <Route path="/product/:id" element={<ProductDetailPage onAddToCart={handleAddToCart} />} />
-          <Route path="/cart" element={<CartPage />} />
-          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/checkout" element={<Checkout searchTerm={searchTerm} />} />
           <Route path="/confirmation" element={<OrderConfirmation />} />
         </Routes>
       </main>

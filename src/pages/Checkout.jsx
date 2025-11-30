@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from "react";
 import cartUtils from "../services/cartUtils";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const GST_RATE = 0.05; // 5%
 const QST_RATE = 0.09975; // 9.975%
 
-function Checkout() {
+function Checkout({ searchTerm = '' }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [cart, setCart] = useState(cartUtils.getCart());
+  const [exitDialogTerm, setExitDialogTerm] = useState('');
+  const [exitDialogDestination, setExitDialogDestination] = useState(null);
+  const prevSearchTermRef = React.useRef('');
+  const didMountRef = React.useRef(false);
 
   // Listen to cart updates (synced from App.jsx global listener)
   useEffect(() => {
@@ -15,6 +20,65 @@ function Checkout() {
     window.addEventListener('cartUpdated', handler);
     return () => window.removeEventListener('cartUpdated', handler);
   }, []);
+
+  // Redirect to home if cart is empty on page load
+  useEffect(() => {
+    if (cart.length === 0 && location.pathname === '/checkout') {
+      navigate('/');
+    }
+  }, [cart, location, navigate]);
+
+  // Show dialog when search term changes on checkout page (Enter key pressed)
+  // Skip the first effect invocation on mount so that a pre-existing searchTerm
+  // (for example when navigating from products to checkout) does not immediately
+  // reopen the exit-confirmation dialog.
+  useEffect(() => {
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
+    }
+
+    if (searchTerm && searchTerm !== prevSearchTermRef.current && location.pathname === '/checkout') {
+      setExitDialogTerm(searchTerm);
+      setExitDialogDestination('search');
+      prevSearchTermRef.current = searchTerm;
+    }
+  }, [searchTerm, location.pathname]);
+
+  // Listen for header logo click event
+  useEffect(() => {
+    const handleHeaderLogoClick = (e) => {
+      e.preventDefault();
+      setExitDialogDestination('home');
+      setExitDialogTerm('home');
+    };
+
+    window.addEventListener('headerLogoClick', handleHeaderLogoClick);
+    return () => window.removeEventListener('headerLogoClick', handleHeaderLogoClick);
+  }, []);
+
+  const confirmExit = () => {
+    if (exitDialogDestination === 'search') {
+      // Apply the requested search term globally so home shows filtered results
+      try {
+        const ev = new CustomEvent('applySearch', { detail: exitDialogTerm });
+        window.dispatchEvent(ev);
+      } catch (err) {
+        // ignore
+      }
+      navigate('/', { state: { searchTerm: exitDialogTerm } });
+    } else if (exitDialogDestination === 'home') {
+      navigate('/');
+    }
+    setExitDialogDestination(null);
+    setExitDialogTerm('');
+  };
+
+  const cancelExit = () => {
+    setExitDialogDestination(null);
+    setExitDialogTerm('');
+    prevSearchTermRef.current = '';
+  };
 
   const [form, setForm] = useState({
     name: "",
@@ -275,6 +339,31 @@ function Checkout() {
           </div>
         </aside>
       </div>
+
+      {/* Exit Checkout Confirmation Dialog */}
+      {exitDialogDestination && (
+        <div className="modal-overlay" onClick={cancelExit}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '450px' }}>
+            <h3 style={{ marginBottom: '1.5rem', fontSize: '1.25rem' }}>You are about to exit the checkout page.</h3>
+            <div style={{ display: 'flex', gap: '1rem' }}>
+              <button
+                className="btn-primary"
+                onClick={confirmExit}
+                style={{ flex: 1 }}
+              >
+                Continue Shopping
+              </button>
+              <button
+                className="btn-primary"
+                onClick={cancelExit}
+                style={{ flex: 1, background: '#6b7280' }}
+              >
+                Proceed Checkout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
