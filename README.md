@@ -66,6 +66,19 @@ npm run preview
 	 - Build command: `npm run build`
 	 - Output directory: `dist`
 
+### Troubleshooting: page reloads / deep links on Vercel
+If you see a Vercel 404 / error page when reloading a client-side route (for example `/checkout` or `/confirmation`), that's because Vercel by default serves static files and doesn't know to return your `index.html` for SPA routes. To fix this, add a `vercel.json` file at the project root with a rewrite to `index.html` (this repository includes it):
+
+```json
+{
+	"rewrites": [
+		{ "source": "/(.*)", "destination": "/index.html" }
+	]
+}
+```
+
+After adding `vercel.json`, redeploy on Vercel (the imported project will pick up the file automatically). Alternatively, if you cannot change server settings, use `HashRouter` in React Router so URLs include a `#/` and avoid server rewrites.
+
 ## Contributing / Team
  - Add your team members and contribution instructions here.
 
