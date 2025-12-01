@@ -123,7 +123,7 @@ Deployment (Vercel)
 2. Sign in to Vercel and import the repository.
 3. Use the default Vite settings; build command `npm run build` and output directory `dist`.
 
-Team
+Team Members
 - Shanley Aninzo
 - Rohina Sultani
 
